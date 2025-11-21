@@ -1,19 +1,14 @@
-// --- ZARZĄDZANIE GŁÓWNYM STANEM APLIKACJI ---
 
 let currentBalance = 5000;
 const balanceElement = document.getElementById('current-balance');
 const gameContent = document.getElementById('game-content');
 const gameNavItems = document.querySelectorAll('.nav-item[data-game]');
 
-// Tablica symboli używanych w grze
 const SLOT_SYMBOLS = ['🍒', '🍋', '🔔', '7️⃣', 'BAR'];
 const REEL_COUNT = 3;
-const SYMBOLS_IN_REEL_VIEW = 30; // Ilość symboli dla iluzji obracania
+const SYMBOLS_IN_REEL_VIEW = 30;
 
-/**
- * Funkcja aktualizująca saldo i jego wyświetlanie.
- * @param {number} amount Kwota do dodania/odjęcia.
- */
+
 function updateBalance(amount) {
     if (currentBalance + amount < 0) {
         return false;
@@ -22,7 +17,6 @@ function updateBalance(amount) {
     currentBalance += amount;
     balanceElement.textContent = `${currentBalance} 🪙`;
     
-    // Wizualna informacja o zmianie
     balanceElement.classList.add(amount >= 0 ? 'balance-win' : 'balance-loss');
     
     setTimeout(() => {
@@ -32,14 +26,10 @@ function updateBalance(amount) {
     return true;
 }
 
-// Inicjalizacja wyświetlania salda
 balanceElement.textContent = `${currentBalance} 🪙`;
 
 
-/**
- * Funkcja ładująca widok gry do głównego obszaru.
- * @param {string} gameKey Klucz gry (np. 'slots', 'roulette').
- */
+
 function loadGame(gameKey) {
     const templateId = `template-${gameKey}`;
     const template = document.getElementById(templateId);
@@ -60,7 +50,7 @@ function loadGame(gameKey) {
         }
     });
 
-    // KLUCZOWA POPRAWKA: Inicjalizacja logiki specyficznej dla gry
+
     if (gameKey === 'slots') {
         initializeSlotMachine();
     } else if (gameKey === 'roulette') {
@@ -69,7 +59,7 @@ function loadGame(gameKey) {
 }
 
 
-// Nasłuchiwanie na kliknięcia w menu gier
+
 gameNavItems.forEach(item => {
     item.addEventListener('click', () => {
         const gameKey = item.getAttribute('data-game');
@@ -80,7 +70,6 @@ gameNavItems.forEach(item => {
     });
 });
 
-// Wczytaj domyślną grę przy starcie
 document.addEventListener('DOMContentLoaded', () => {
     const initialActiveGame = document.querySelector('.nav-item.active[data-game]');
     if (initialActiveGame) {
@@ -88,16 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Udostępnienie funkcji globalnie
 window.updateBalance = updateBalance;
 
 
-// --- LOGIKA JEDNORĘKIEGO BANDYTY ---
 
 function generateReelContent(reelElement) {
     reelElement.innerHTML = '';
     
-    // Generowanie symboli dla efektu obracania
+
     for (let i = 0; i < SYMBOLS_IN_REEL_VIEW; i++) {
         const symbol = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
         const div = document.createElement('div');
@@ -107,21 +94,15 @@ function generateReelContent(reelElement) {
     }
 }
 
-/**
- * Animuje bęben i ustala wynik.
- * @param {HTMLElement} reelElement Element bębna.
- * @param {string} finalSymbol Symbol, na którym bęben ma się zatrzymać.
- * @param {number} delay Opóźnienie startu animacji (ms).
- */
+
 function spinReel(reelElement, finalSymbol, delay) {
     return new Promise(resolve => {
         setTimeout(() => {
-            
-            // 1. Reset i generowanie (przygotowanie do obrotu)
+
             reelElement.style.transition = 'none';
             reelElement.style.transform = 'translateY(0)';
             
-            // Generujemy zawartość - ostatni symbol na bębnie BĘDZIE naszym symbolem docelowym.
+          
             generateReelContent(reelElement); 
             
             const div = document.createElement('div');
@@ -129,50 +110,45 @@ function spinReel(reelElement, finalSymbol, delay) {
             div.textContent = finalSymbol;
             reelElement.appendChild(div);
             
-            // 2. Obliczanie transformacji
+     
             const symbolHeight = 80; 
-            // Przesunięcie to (ilość symboli dla animacji - 2 widoczne symbole ponad linią wygrywającą) * wysokość symbolu.
-            // Zapewnia to, że symbol docelowy (który jest na samym dole) zatrzyma się na 3. pozycji (środek widoku)
+
             const scrollDistance = (SYMBOLS_IN_REEL_VIEW - 2) * symbolHeight;
 
-            // 3. Rozpoczęcie animacji
+            
             const duration = 2000 + reelElement.getAttribute('data-reel') * 500; 
 
-            // Wymuś reflow przed rozpoczęciem animacji (ważne!)
             reelElement.offsetHeight; 
 
             reelElement.style.transition = `transform ${duration / 1000}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
             reelElement.style.transform = `translateY(-${scrollDistance}px)`;
 
-            // 4. Czekaj na zakończenie animacji
+ 
             reelElement.addEventListener('transitionend', function handler() {
                 reelElement.removeEventListener('transitionend', handler);
                 
-                // KLUCZOWA KOREKTA: Po zakończeniu animacji
-                // Tworzymy uproszczoną listę 5 symboli dla widoku statycznego
+    
                 
                 reelElement.style.transition = 'none';
                 
                 const symbols = [];
                 
-                // Dodajemy 2 losowe symbole nad docelowym (dla widoku góry)
+ 
                 for (let i = 0; i < 2; i++) {
                     symbols.push(SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]);
                 }
                 
-                // Dodajemy docelowy symbol na środku (linia wygrywająca)
+               
                 symbols.push(finalSymbol);
                 
-                // Uzupełniamy resztę bębna (2 symbole poniżej docelowego)
+            
                  for (let i = 0; i < 2; i++) {
                     symbols.push(SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]);
                 }
                 
-                // Wstawiamy te 5 symboli do DOM
                 reelElement.innerHTML = symbols.map(s => `<div class="symbol">${s}</div>`).join('');
                 
-                // Przesuwamy transform, aby 3. symbol (indeks 2) był na linii wygrywającej
-                // Co odpowiada przesunięciu o 2 wysokości symbolu.
+
                 const symbolHeight = 80; 
                 reelElement.style.transform = `translateY(-${2 * symbolHeight}px)`;
 
@@ -183,14 +159,14 @@ function spinReel(reelElement, finalSymbol, delay) {
     });
 }
 
-// Mapowanie symboli na mnożniki wygranej
+
 const PAYOUTS = {
     '7️⃣7️⃣7️⃣': 15,
     'BARBARBAR': 10,
     '🍒🍒🍒': 5,
     '🍋🍋🍋': 3,
     '🔔🔔🔔': 2,
-    'ANY_DOUBLE': 1.5 // Mnożnik za dowolne dwa symbole
+    'ANY_DOUBLE': 1.5 
 };
 
 function checkWin(results, betAmount) {
@@ -198,19 +174,19 @@ function checkWin(results, betAmount) {
     const [r1, r2, r3] = results;
     let winAmount = 0;
     
-    // Ustalanie klucza wygrywającego (np. '7️⃣7️⃣7️⃣')
+   
     const key = r1 + r2 + r3;
     
     if (PAYOUTS[key]) {
-        // Potrójna wygrana
+  
         winAmount = betAmount * PAYOUTS[key];
         messageElement.textContent = `JACKPOT! Wygrałeś ${Math.round(winAmount)} 🪙 z kombinacji ${key}!`;
     } else if (r1 === r2 || r2 === r3 || r1 === r3) {
-        // Podwójna wygrana (na linii wypłaty jest 1. symbol)
+
         winAmount = betAmount * PAYOUTS['ANY_DOUBLE'];
         messageElement.textContent = `Wygrałeś podwójny symbol: ${Math.round(winAmount)} 🪙!`;
     } else {
-        // Przegrana
+
         messageElement.textContent = 'Spróbuj ponownie! 💔';
         messageElement.classList.add('loss');
     }
@@ -243,7 +219,6 @@ function handleSpin() {
         return;
     }
 
-    // Odjęcie zakładu i blokada przycisku
     const deducted = updateBalance(-betAmount);
     if (!deducted) return;
     
@@ -251,17 +226,17 @@ function handleSpin() {
     messageElement.textContent = 'Obracanie...';
     messageElement.classList.remove('win', 'loss');
 
-    // Wylosowanie wyników
+
     const finalResults = Array.from({ length: REEL_COUNT }, () => 
         SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]
     );
 
-    // Uruchomienie animacji dla wszystkich bębnów
+
     const spinPromises = Array.from(reels).map((reel, index) => {
         return spinReel(reel, finalResults[index], index * 200); 
     });
 
-    // Czekaj na zakończenie wszystkich animacji
+
     Promise.all(spinPromises).then(() => {
         spinButton.disabled = false;
         checkWin(finalResults, betAmount);
@@ -281,13 +256,12 @@ function initializeSlotMachine() {
         return;
     }
     
-    // Inicjalizacja: Ustawienie na symbolach, aby nie było pustej przestrzeni na starcie
+
     reels.forEach(reel => {
         reel.style.transition = 'none';
         reel.innerHTML = '';
         const symbolHeight = 80; 
-        
-        // Wypełniamy bęben 5 symbolami (2 góra, 1 środek, 2 dół), aby były widoczne i góra i dół
+       
         const initialSymbols = [];
         for (let i = 0; i < 5; i++) {
             initialSymbols.push(SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]);
@@ -295,16 +269,15 @@ function initializeSlotMachine() {
         
         reel.innerHTML = initialSymbols.map(s => `<div class="symbol">${s}</div>`).join('');
         
-        // POPRAWKA: Ustawiamy transform, aby środkowy symbol (TRZECI w liście, indeks 2) był na linii wygrywającej
+  
         reel.style.transform = `translateY(-${2 * symbolHeight}px)`; 
     });
 
-    // Podpięcie przycisku ZAKRĘĆ
+
     if (spinButton) {
         spinButton.onclick = handleSpin;
     }
     
-    // Ustawienie domyślnego zakładu na 150
     const betInput = document.getElementById('bet-amount');
     if (betInput) {
         betInput.value = 150;
@@ -312,14 +285,12 @@ function initializeSlotMachine() {
 }
 
 
-// --- LOGIKA RULETKI (CAROUSEL STRIP) ---
 
-// Definicja pól ruletki w kolejności na kole europejskim.
 const ROULETTE_NUMBERS_ORDER = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
 ];
 
-// Mapowanie numerów na kolor
+
 const ROULETTE_COLORS = {
     0: 'zero',
     1: 'red', 2: 'black', 3: 'red', 4: 'black', 5: 'red', 6: 'black', 7: 'red', 8: 'black', 9: 'red', 10: 'black',
@@ -328,7 +299,7 @@ const ROULETTE_COLORS = {
     31: 'black', 32: 'red', 33: 'black', 34: 'red', 35: 'black', 36: 'red'
 };
 
-// Mapowanie ogólnych zakładów na numery
+
 const ROULETTE_BET_MAP = {
     'dozen1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     'dozen2': [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
@@ -339,16 +310,16 @@ const ROULETTE_BET_MAP = {
     'odd': [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
     'red': Object.keys(ROULETTE_COLORS).filter(n => ROULETTE_COLORS[n] === 'red').map(Number),
     'black': Object.keys(ROULETTE_COLORS).filter(n => ROULETTE_COLORS[n] === 'black').map(Number),
-    'row1': [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34], // 1st Row
-    'row2': [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35], // 3rd Row
-    'row3': [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36], // 3rd Row
+    'row1': [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34], 
+    'row2': [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35], 
+    'row3': [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
 };
 
-// Współczynniki wypłat (zakład:wypłata)
+
 const ROULETTE_PAYOUTS = {
     single: 35,
-    dozen: 2, // dozen1, dozen2, dozen3, row1, row2, row3
-    half: 1 // half1, half2, even, odd, red, black
+    dozen: 2, 
+    half: 1
 };
 
 // Stan zakładów
@@ -654,4 +625,5 @@ function initializeRoulette() {
     currentRouletteBets = {};
     updateBetChips();
     document.getElementById('roulette-message').textContent = 'Postaw zakład, wybierz pola i Zakręć!';
+
 }
