@@ -1,0 +1,591 @@
+:root {
+    --color-dark-bg: #1e1e2f;
+    --color-main-bg: #27293d;
+    --color-sidebar-bg: #1c1c28;
+    --color-text-light: #e0e0e0;
+    --color-text-muted: #8a8a8a;
+    --color-accent: #ff4757; /* Czerwony akcent (jak w logo/przycisku) */
+    --color-accent-hover: #e03947;
+    --color-highlight: #ffc312; /* Złoty/żółty dla salda i aktywnych elementów */
+    --color-slots-border: #4a4a6b;
+    --slot-symbol-size: 80px;
+    --slot-reel-width: 120px;
+    --slots-height: 240px;
+
+    /* Zmienne dla Ruletki */
+    --color-green: #008000;
+    --roulette-tile-size: 80px;
+}
+
+/* Podstawowy Reset i Stylizacja */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-dark-bg);
+    color: var(--color-text-light);
+    height: 100vh;
+    overflow: hidden; /* Dla aplikacji Electron, by kontrolować scrollowanie */
+    display: flex;
+}
+
+/* Główny Układ */
+.main-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* Sidebar (Panel Boczny) */
+.sidebar {
+    width: 280px;
+    background-color: var(--color-sidebar-bg);
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.logo-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 20px;
+}
+
+.logo-header h1 {
+    font-size: 2.5em;
+    font-weight: 900;
+    color: var(--color-highlight);
+    letter-spacing: 2px;
+    margin-bottom: 0;
+}
+
+.logo-header p {
+    font-size: 0.9em;
+    color: var(--color-text-muted);
+    margin-top: -5px;
+    text-transform: uppercase;
+}
+
+/* Informacje o Portfelu */
+.wallet-info {
+    background-color: var(--color-main-bg);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wallet-info span {
+    font-size: 0.8em;
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.wallet-info .balance {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--color-highlight);
+    transition: all 0.5s ease;
+}
+
+.wallet-info .balance-win {
+    color: limegreen;
+    transform: scale(1.1);
+}
+
+.wallet-info .balance-loss {
+    color: var(--color-accent);
+    transform: scale(0.9);
+}
+
+/* Nawigacja po Grach */
+.game-nav {
+    flex-grow: 1; /* Rozciąga się, by wypełnić przestrzeń */
+}
+
+.game-nav h2 {
+    font-size: 1em;
+    color: var(--color-text-muted);
+    margin: 20px 0 10px 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.game-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 1.0em;
+}
+
+.nav-item:not(.disabled):hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-item.active {
+    background-color: var(--color-accent);
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(255, 71, 87, 0.3);
+}
+
+.nav-item.active:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.nav-item .icon {
+    margin-right: 15px;
+    font-size: 1.2em;
+    line-height: 1;
+    /* POPRAWKA: Wymuszenie użycia czcionek z dobrym wsparciem dla Emoji */
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Segoe UI Symbol', sans-serif;
+    vertical-align: middle;
+}
+
+/* Wyłączone Gry */
+.nav-item.disabled {
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.nav-item.disabled .status {
+    margin-left: auto;
+    font-size: 0.75em;
+    background-color: #333;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+/* Przycisk Wylogowania */
+.logout-button {
+    background-color: var(--color-main-bg);
+    color: var(--color-text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: var(--color-accent);
+    color: #fff;
+}
+
+
+/* Obszar Gry (MAIN) */
+.game-area {
+    flex-grow: 1;
+    background-color: var(--color-main-bg);
+    padding: 40px;
+    overflow-y: auto; /* Umożliwia scrollowanie zawartości gry */
+}
+
+#game-content {
+    background-color: var(--color-dark-bg);
+    padding: 40px;
+    min-height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    text-align: center; /* Wyśrodkowanie zawartości */
+}
+
+.welcome-message {
+    color: var(--color-highlight);
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+/* Szablon dla Zawartości Gry */
+.game-view {
+    /* Podstawowy styl dla każdej wczytanej gry */
+    padding: 20px;
+}
+
+.game-view h3 {
+    font-size: 1.8em;
+    color: var(--color-accent);
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* Wspólne style dla przycisków */
+.mock-button {
+    background-color: var(--color-accent);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.mock-button:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.mock-button.large-button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+}
+
+/* --- STYLE SPECYFICZNE DLA JEDNORĘKIEGO BANDYTY (SLOTS) --- */
+
+.slots-container {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding: 20px 0;
+    margin: 30px auto;
+    background-color: #33334c; /* Tło automatu */
+    border-radius: 10px;
+    border: 3px solid var(--color-slots-border);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+}
+
+.slots-reels {
+    display: flex;
+    gap: 10px;
+    height: var(--slot-symbol-size); /* Wysokość wyświetlania jednego symbolu */
+    overflow: hidden;
+}
+
+.reel {
+    width: var(--slot-reel-width);
+    height: 100%;
+    border: 2px solid var(--color-highlight);
+    border-radius: 4px;
+    background-color: #111;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8);
+    position: relative;
+    /* Dodajemy przejście dla płynnej animacji obracania */
+    transition: transform 0.1s ease-out; 
+}
+
+.symbol {
+    height: var(--slot-symbol-size);
+    line-height: var(--slot-symbol-size);
+    font-size: 3em;
+    text-align: center;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Linia wygrywająca */
+.slots-payline-indicator {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    right: 10px;
+    height: 4px;
+    background-color: var(--color-accent);
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px var(--color-accent);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Kontrolki gry */
+.slots-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.bet-control label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--color-text-light);
+    font-weight: 600;
+}
+
+.bet-control input {
+    background-color: var(--color-dark-bg);
+    color: var(--color-highlight);
+    border: 1px solid var(--color-slots-border);
+    padding: 8px 15px;
+    border-radius: 4px;
+    width: 120px;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+/* Przyciski i wiadomości */
+.slots-message {
+    margin-top: 20px;
+    font-size: 1.1em;
+    font-style: italic;
+    min-height: 25px; /* Zapobiega skakaniu elementów */
+}
+
+/* Stan przycisku podczas obracania */
+#spin-button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Kolor dla wygranej */
+.slots-message.win {
+    color: limegreen;
+    font-weight: bold;
+}
+/* Kolor dla przegranej */
+.slots-message.loss {
+    color: var(--color-accent);
+}
+
+/* --- STYLE SPECYFICZNE DLA RULETKI (CAROUSEL STRIP) --- */
+
+.roulette-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.roulette-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0 30px;
+}
+
+#reset-bets {
+    background-color: var(--color-slots-border);
+    color: var(--color-text-light);
+    border: none;
+}
+
+#reset-bets:hover {
+    background-color: #55557a;
+}
+
+/* KONTENER STRIPU */
+.roulette-strip-viewport {
+    width: 600px; /* Określona szerokość widocznego obszaru */
+    height: var(--roulette-tile-size);
+    overflow: hidden;
+    margin: 30px auto;
+    border: 5px solid var(--color-highlight);
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    position: relative;
+    background-color: #111;
+}
+
+.roulette-strip {
+    height: 100%;
+    display: flex;
+    white-space: nowrap; /* Zapobiega łamaniu linii */
+    /* Początkowe przejście, będzie modyfikowane w JS */
+    transition: transform 0.1s linear; 
+}
+
+.roulette-number-tile {
+    /* Rozmiar każdego pojedynczego pola na pasku */
+    width: var(--roulette-tile-size); 
+    height: var(--roulette-tile-size);
+    line-height: var(--roulette-tile-size);
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: white;
+    flex-shrink: 0; /* Ważne: zapobiega kurczeniu się kafelków */
+    border-right: 1px solid #333;
+    user-select: none;
+}
+
+.roulette-number-tile.red {
+    background-color: #a50000;
+}
+
+.roulette-number-tile.black {
+    background-color: #111111;
+}
+
+.roulette-number-tile.zero {
+    background-color: var(--color-green);
+}
+
+/* WSKAŹNIK (ZAMIAST KULKI) */
+.roulette-indicator {
+    position: absolute;
+    left: 50%; /* Wyśrodkowanie */
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--color-accent); /* Zmieniono na kolor akcentu dla lepszej widoczności */
+    box-shadow: 0 0 10px var(--color-accent);
+    transform: translateX(-50%);
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Tabela Zakładów */
+.bet-table-container {
+    margin: 30px auto;
+    max-width: 900px;
+}
+
+.bet-table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: center;
+    background-color: var(--color-dark-bg);
+}
+
+.bet-table td {
+    border: 1px solid var(--color-text-muted);
+    padding: 10px 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    position: relative;
+    transition: background-color 0.1s;
+    user-select: none;
+}
+
+.bet-table td:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style dla konkretnych pól */
+.bet-number {
+    font-weight: bold;
+}
+
+.bet-number.red {
+    background-color: #a50000;
+}
+
+.bet-number.black {
+    background-color: #111111;
+    color: var(--color-text-light);
+}
+
+.bet-zero {
+    background-color: var(--color-green);
+    font-size: 1.5em;
+    font-weight: bold;
+    min-width: 50px;
+}
+
+.bet-row, .bet-dozen, .bet-half {
+    background-color: #333;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.black-bg {
+    background-color: #111111 !important;
+}
+
+.red-bg {
+    background-color: #a50000 !important;
+}
+
+/* Wizualizacja zakładów (żetony) */
+.bet-chip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    border-radius: 50%;
+    background-color: var(--color-highlight);
+    color: var(--color-dark-bg);
+    font-weight: bold;
+    font-size: 0.8em;
+    text-align: center;
+    border: 2px solid #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    display: none; /* Domyślnie ukryte */
+    z-index: 20;
+}
+
+.bet-chip.active {
+    display: block;
+}
+
+/* Ostatnie wyniki */
+.previous-results {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.previous-results h4 {
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+}
+
+.previous-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+}
+
+.previous-list li {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: white;
+    flex-shrink: 0;
+}
+
+.previous-list li.red {
+    background-color: #a50000;
+}
+
+.previous-list li.black {
+    background-color: #111111;
+}
+
+.previous-list li.zero {
+    background-color: var(--color-green);
+}
+
+.visuallyhidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    border: 0;
+    padding: 0;
+    clip: rect(0 0 0 0);
+    overflow: hidden;
+}

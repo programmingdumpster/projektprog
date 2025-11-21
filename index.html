@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackBet Casino - Główny Ekran</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <div class="main-layout">
+        
+        <aside class="sidebar">
+            <header class="logo-header">
+                <h1>BLACKBET</h1>
+                <p>Casino</p>
+            </header>
+            
+            <div class="wallet-info">
+                <span>SALDO KONTA</span>
+                <p class="balance" id="current-balance">5000 🪙</p>
+            </div>
+
+            <nav class="game-nav">
+                <h2>DOSTĘPNE GRY</h2>
+                <ul id="available-games-list">
+                    <li class="nav-item active" data-game="slots">
+                        <i class="icon">🎰</i> Jednoręki Bandyta
+                    </li>
+                    <li class="nav-item" data-game="roulette">
+                        <i class="icon">🎡</i> Ruletka
+                    </li>
+                </ul>
+
+                <h2 class="unavailable-heading">INNE GRY</h2>
+                <ul class="unavailable-games">
+                    <li class="nav-item disabled" data-game="dice-roll">
+                        <i class="icon">🎲</i> Rzut Kośćmi <span class="status">WKRÓTCE</span>
+                    </li>
+                    <li class="nav-item disabled" data-game="craps">
+                        <i class="icon">💰</i> Craps (Kości) <span class="status">WKRÓTCE</span>
+                    </li>
+                    <li class="nav-item disabled">
+                        <i class="icon">♠️</i> Blackjack <span class="status">WKRÓTCE</span>
+                    </li>
+                    <li class="nav-item disabled">
+                        <i class="icon">🃏</i> Poker <span class="status">WKRÓTCE</span>
+                    </li>
+                </ul>
+            </nav>
+            
+            <button class="logout-button">WYLOGUJ SIĘ</button>
+        </aside>
+
+        <main class="game-area">
+            <section id="game-content">
+                <h2 class="welcome-message">Witaj w BlackBet Casino!</h2>
+                <p>Wybierz jedną z gier po lewej, aby rozpocząć rozgrywkę.</p>
+                
+            </section>
+        </main>
+    </div>
+
+    <template id="template-slots">
+        <div class="game-view slots-game">
+            <h3>🎰 Jednoręki Bandyta</h3>
+
+            <div class="slots-container">
+                <div class="slots-reels" id="slots-reels">
+                    <div class="reel" data-reel="0">
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">7️⃣</div>
+                    </div>
+                    <div class="reel" data-reel="1">
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🔔</div>
+                        <div class="symbol">🍒</div>
+                    </div>
+                    <div class="reel" data-reel="2">
+                        <div class="symbol">7️⃣</div>
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🔔</div>
+                    </div>
+                </div>
+                <div class="slots-payline-indicator"></div>
+            </div>
+
+            <div class="slots-controls">
+                <div class="bet-control">
+                    <label for="bet-amount">Wybierz zakład (🪙):</label>
+                    <input type="number" id="bet-amount" value="100" min="50" step="50">
+                </div>
+                
+                <button id="spin-button" class="mock-button large-button">ZAKRĘĆ</button>
+            </div>
+
+            <p id="slots-message" class="slots-message">Gotowy do gry! Postaw zakład i naciśnij Zakręć.</p>
+        </div>
+    </template>
+
+    <template id="template-roulette">
+        <div class="game-view roulette-game">
+            <h3>🎡 Ruletka</h3>
+
+            <div class="roulette-strip-viewport">
+                <div class="roulette-indicator"></div> 
+                <div class="roulette-strip" id="roulette-strip">
+                    </div>
+            </div>
+
+            <div class="roulette-controls">
+                <div class="bet-control">
+                    <label for="roulette-bet-amount">Kwota zakładu na żeton (🪙):</label>
+                    <input type="number" id="roulette-bet-amount" value="10" min="10" step="10">
+                </div>
+                <button type="button" class="btn mock-button large-button" id="spin-roulette">ZAKRĘĆ</button>
+                <button type="button" class="btn btn-reset mock-button" id="reset-bets">WYCZYŚĆ ZAKŁADY</button>
+                <p id="roulette-message" class="slots-message">Postaw zakład, wybierz pola i Zakręć!</p>
+            </div>
+            
+            <div class="bet-table-container">
+                <table class="bet-table" id="roulette-bet-table">
+                    <tr>
+                        <td colspan="1" rowspan="3" class="bet-zero" data-bet="0">0<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="3">3<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="6">6<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="9">9<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="12">12<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="15">15<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="18">18<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="21">21<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="24">24<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="27">27<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="30">30<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="33">33<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="36">36<span class="bet-chip"></span></td>
+                        <td class="bet-row" data-bet="row3">3rd ROW<span class="bet-chip"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="bet-number black" data-bet="2">2<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="5">5<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="8">8<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="11">11<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="14">14<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="17">17<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="20" >20<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="23">23<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="26">26<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="29">29<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="32">32<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="35">35<span class="bet-chip"></span></td>
+                        <td class="bet-row" data-bet="row2">2nd ROW<span class="bet-chip"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="bet-number red" data-bet="1">1<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="4">4<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="7">7<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="10">10<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="13">13<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="16">16<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="19">19<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="22">22<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="25">25<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="28">28<span class="bet-chip"></span></td>
+                        <td class="bet-number black" data-bet="31">31<span class="bet-chip"></span></td>
+                        <td class="bet-number red" data-bet="34">34<span class="bet-chip"></span></td>
+                        <td class="bet-row" data-bet="row1">1st ROW<span class="bet-chip"></span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="1" class="bet-empty"></td>
+                        <td colspan="4" class="bet-dozen" data-bet="dozen1">1st 12<span class="bet-chip"></span></td>
+                        <td colspan="4" class="bet-dozen" data-bet="dozen2">2nd 12<span class="bet-chip"></span></td>
+                        <td colspan="4" class="bet-dozen" data-bet="dozen3">3rd 12<span class="bet-chip"></span></td>
+                        <td colspan="1" class="bet-empty"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="1" class="bet-empty"></td>
+                        <td colspan="2" class="bet-half" data-bet="half1">1-18<span class="bet-chip"></span></td>
+                        <td colspan="2" class="bet-half" data-bet="even">EVEN<span class="bet-chip"></span></td>
+                        <td colspan="2" class="bet-color black-bg" data-bet="black">BLACK<span class="bet-chip"></span></td>
+                        <td colspan="2" class="bet-color red-bg" data-bet="red">RED<span class="bet-chip"></span></td>
+                        <td colspan="2" class="bet-half" data-bet="odd">ODD<span class="bet-chip"></span></td>
+                        <td colspan="2" class="bet-half" data-bet="half2">19-36<span class="bet-chip"></span></td>
+                        <td colspan="1" class="bet-empty"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="previous-results">
+                <h4>OSTATNIE WYNIKI</h4>
+                <ol class="previous-list" id="roulette-previous-list">
+                    <li class='visuallyhidden placeholder'>Brak wyników.</li>
+                </ol>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-dice-roll">
+        <div class="game-view dice-roll-game">
+            <h3>🎲 Rzut Kośćmi</h3>
+            <p>To jest miejsce na logikę i interfejs gry Rzut Kośćmi.</p>
+            <div class="game-mock-content">
+                <p>Wynik rzutu: **5**</p>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-craps">
+        <div class="game-view craps-game">
+            <h3>💵 Craps (Kości)</h3>
+            <p>To jest miejsce na logikę i interfejs gry Craps.</p>
+            <div class="game-mock-content">
+                <p>Point: **6**</p>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
